@@ -15,5 +15,11 @@ insert into stops (id, city_id, name) values
     ('STOP-CENTRAL', 'CPH', 'Copenhagen Central Station')
 on conflict do nothing;
 
--- Add route_stops rows after deciding the key.
--- Add at least two trips per route on the same service date.
+insert into route_stops (route_id, stop_id, stop_sequence) values
+    ('LINE-M2', 'STOP-NORREPORT', 1),
+    ('LINE-M2', 'STOP-KONGENS-NYTORV', 2),
+    ('LINE-M2', 'STOP-AIRPORT', 3),
+    ('LINE-5C', 'STOP-CENTRAL', 1),
+    ('LINE-5C', 'STOP-NORREPORT', 2),
+    ('LINE-5C', 'STOP-KONGENS-NYTORV', 3)
+on conflict (route_id, stop_sequence) do nothing;
