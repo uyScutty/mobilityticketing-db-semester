@@ -5,7 +5,8 @@ on conflict do nothing;
 
 insert into routes (id, operator_id, city_id, mode, short_name) values
     ('LINE-M2', 'OP-METRO', 'CPH', 'metro', 'M2'),
-    ('LINE-5C', 'OP-BUS', 'CPH', 'bus', '5C')
+    ('LINE-5C', 'OP-BUS', 'CPH', 'bus', '5C'),
+    ('LINE-12', 'OP-BUS', 'CPH', 'bus', '12')
 on conflict do nothing;
 
 insert into stops (id, city_id, name) values
@@ -23,3 +24,14 @@ insert into route_stops (route_id, stop_id, stop_sequence) values
     ('LINE-5C', 'STOP-NORREPORT', 2),
     ('LINE-5C', 'STOP-KONGENS-NYTORV', 3)
 on conflict (route_id, stop_sequence) do nothing;
+
+-- Lecture 1 trip data. LINE-12 deliberately has no trips on this date so the
+-- LEFT JOIN reporting query can demonstrate a zero count.
+insert into trips (
+    id, route_id, service_date, scheduled_departure_utc, status
+) values
+    ('TRIP-M2-20260429-0800', 'LINE-M2', '2026-04-29', '2026-04-29 08:00:00+00', 'Scheduled'),
+    ('TRIP-M2-20260429-1200', 'LINE-M2', '2026-04-29', '2026-04-29 12:00:00+00', 'Scheduled'),
+    ('TRIP-5C-20260429-0900', 'LINE-5C', '2026-04-29', '2026-04-29 09:00:00+00', 'Scheduled'),
+    ('TRIP-5C-20260429-1700', 'LINE-5C', '2026-04-29', '2026-04-29 17:00:00+00', 'Scheduled')
+on conflict do nothing;

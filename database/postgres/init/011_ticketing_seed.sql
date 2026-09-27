@@ -6,7 +6,13 @@ insert into trips (
     ('TRIP-M2-20260429-1200', 'LINE-M2', '2026-04-29', '2026-04-29 12:00:00+00', 'Scheduled', 120, 0),
     ('TRIP-5C-20260429-0900', 'LINE-5C', '2026-04-29', '2026-04-29 09:00:00+00', 'Scheduled', 80, 1),
     ('TRIP-5C-20260429-1700', 'LINE-5C', '2026-04-29', '2026-04-29 17:00:00+00', 'Scheduled', 80, 0)
-on conflict do nothing;
+on conflict (id) do update
+set route_id = excluded.route_id,
+    service_date = excluded.service_date,
+    scheduled_departure_utc = excluded.scheduled_departure_utc,
+    status = excluded.status,
+    capacity = excluded.capacity,
+    reserved_seats = excluded.reserved_seats;
 
 insert into products (code, name, price, currency) values
     ('SINGLE', 'Single trip', 36.00, 'DKK'),

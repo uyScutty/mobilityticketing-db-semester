@@ -1,0 +1,107 @@
+Lecture 2 PostgreSQL test output
+
+===== database/postgres/init/001_relational_baseline.sql =====
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+
+===== database/postgres/init/002_seed.sql =====
+INSERT 0 2
+INSERT 0 3
+INSERT 0 4
+INSERT 0 6
+INSERT 0 4
+
+===== database/postgres/init/010_ticketing_draft.sql =====
+ALTER TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+
+===== database/postgres/init/011_ticketing_seed.sql =====
+INSERT 0 4
+INSERT 0 2
+INSERT 0 2
+INSERT 0 2
+INSERT 0 2
+INSERT 0 1
+
+===== database/postgres/migrations/020_enforce_ticketing_integrity.sql =====
+BEGIN
+SET
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+CREATE INDEX
+ALTER TABLE
+COMMIT
+
+===== database/postgres/experiments/lecture02/verify_constraints.sql =====
+DO
+                                result                                 
+-----------------------------------------------------------------------
+ PASS: 21 named constraints and the partial unique payment index exist
+(1 row)
+
+
+===== database/postgres/experiments/lecture02/successful_writes.sql =====
+BEGIN
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+DO
+                              result                              
+------------------------------------------------------------------
+ PASS: valid product, user, ticket, payment and validation writes
+(1 row)
+
+ROLLBACK
+
+===== database/postgres/experiments/lecture02/failed_writes.sql =====
+BEGIN
+DO
+                      result                       
+---------------------------------------------------
+ PASS: negative capacity rejected (SQLSTATE 23514)
+(1 row)
+
+DO
+                    result                    
+----------------------------------------------
+ PASS: unknown user rejected (SQLSTATE 23503)
+(1 row)
+
+DO
+                        result                         
+-------------------------------------------------------
+ PASS: duplicate ticket code rejected (SQLSTATE 23505)
+(1 row)
+
+DO
+                       result                       
+----------------------------------------------------
+ PASS: malformed currency rejected (SQLSTATE 23514)
+(1 row)
+
+DO
+                          result                          
+----------------------------------------------------------
+ PASS: reversed validity window rejected (SQLSTATE 23514)
+(1 row)
+
+DO
+                                result                                
+----------------------------------------------------------------------
+ PASS: duplicate captured payment reference rejected (SQLSTATE 23505)
+(1 row)
+
+ROLLBACK
+
+Lecture 2 tests passed.

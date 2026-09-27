@@ -1,0 +1,114 @@
+Lecture 3 PostgreSQL test output
+
+===== database/postgres/init/001_relational_baseline.sql =====
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+
+===== database/postgres/init/002_seed.sql =====
+INSERT 0 2
+INSERT 0 3
+INSERT 0 4
+INSERT 0 6
+INSERT 0 4
+
+===== database/postgres/init/010_ticketing_draft.sql =====
+ALTER TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+
+===== database/postgres/init/011_ticketing_seed.sql =====
+INSERT 0 4
+INSERT 0 2
+INSERT 0 2
+INSERT 0 2
+INSERT 0 2
+INSERT 0 1
+
+===== database/postgres/migrations/020_enforce_ticketing_integrity.sql =====
+BEGIN
+SET
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+CREATE INDEX
+ALTER TABLE
+COMMIT
+
+===== database/postgres/migrations/021_add_reporting_programmability.sql =====
+BEGIN
+SET
+CREATE FUNCTION
+CREATE TABLE
+CREATE FUNCTION
+CREATE TRIGGER
+SELECT 1
+CREATE INDEX
+COMMIT
+
+===== database/postgres/experiments/lecture03/reporting_function.sql =====
+ route_id | route_short_name | scheduled_trip_count 
+----------+------------------+----------------------
+ LINE-12  | 12               |                    0
+ LINE-5C  | 5C               |                    2
+ LINE-M2  | M2               |                    2
+(3 rows)
+
+DO
+                          result                          
+----------------------------------------------------------
+ PASS: reporting function returns route counts 2, 2 and 0
+(1 row)
+
+
+===== database/postgres/experiments/lecture03/trigger_experiment.sql =====
+BEGIN
+UPDATE 1
+DO
+ ticket_id | old_status | new_status 
+-----------+------------+------------
+ TICKET-1  | Active     | Validated
+(1 row)
+
+                            result                            
+--------------------------------------------------------------
+ PASS: trigger recorded the Active-to-Validated status change
+(1 row)
+
+ROLLBACK
+
+===== database/postgres/experiments/lecture03/materialized_view_experiment.sql =====
+BEGIN
+INSERT 0 1
+     stage      | base_ticket_count | materialized_ticket_count 
+----------------+-------------------+---------------------------
+ before_refresh |                 3 |                         2
+(1 row)
+
+DO
+                                 result                                 
+------------------------------------------------------------------------
+ PASS: materialized view is stale while the base-table query is current
+(1 row)
+
+REFRESH MATERIALIZED VIEW
+     stage     | base_ticket_count | materialized_ticket_count 
+---------------+-------------------+---------------------------
+ after_refresh |                 3 |                         3
+(1 row)
+
+DO
+                          result                          
+----------------------------------------------------------
+ PASS: refresh brought the materialized view back in sync
+(1 row)
+
+ROLLBACK
+
+Lecture 3 tests passed.

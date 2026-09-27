@@ -1,0 +1,292 @@
+Lecture 4 PostgreSQL test output
+
+===== database/postgres/init/001_relational_baseline.sql =====
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+
+===== database/postgres/init/002_seed.sql =====
+INSERT 0 2
+INSERT 0 3
+INSERT 0 4
+INSERT 0 6
+INSERT 0 4
+
+===== database/postgres/init/010_ticketing_draft.sql =====
+ALTER TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+
+===== database/postgres/init/011_ticketing_seed.sql =====
+INSERT 0 4
+INSERT 0 2
+INSERT 0 2
+INSERT 0 2
+INSERT 0 2
+INSERT 0 1
+
+===== database/postgres/migrations/020_enforce_ticketing_integrity.sql =====
+BEGIN
+SET
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+CREATE INDEX
+ALTER TABLE
+COMMIT
+
+===== database/postgres/init/013_migration_fixture.sql =====
+INSERT 0 1
+
+===== database/postgres/migrations/021_add_reporting_programmability.sql =====
+BEGIN
+SET
+CREATE FUNCTION
+CREATE TABLE
+CREATE FUNCTION
+CREATE TRIGGER
+SELECT 2
+CREATE INDEX
+COMMIT
+
+===== database/postgres/experiments/lecture04/baseline.sql =====
+ current_database 
+------------------
+ mobility_l4_test
+(1 row)
+
+    id    | product_code | price | currency 
+----------+--------------+-------+----------
+ TICKET-1 | SINGLE       | 36.00 | DKK
+ TICKET-2 | SINGLE       | 36.00 | DKK
+ TICKET-3 | DAY          | 65.00 | DKK
+(3 rows)
+
+ id | product_code 
+----+--------------
+(0 rows)
+
+DO
+                                       result                                        
+-------------------------------------------------------------------------------------
+ PASS: baseline has three tickets and preserves DAY price 65 DKK vs catalogue 80 DKK
+(1 row)
+
+
+===== database/postgres/migrations/030_expand_product_identity.sql =====
+BEGIN
+SET
+ALTER TABLE
+UPDATE 2
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+COMMIT
+
+===== database/postgres/experiments/lecture04/old_reader.sql =====
+    id    | product_code | price | currency 
+----------+--------------+-------+----------
+ TICKET-1 | SINGLE       | 36.00 | DKK
+ TICKET-2 | SINGLE       | 36.00 | DKK
+ TICKET-3 | DAY          | 65.00 | DKK
+(3 rows)
+
+
+===== database/postgres/experiments/lecture04/new_reader.sql =====
+    id    |         resolved_product_id          | resolved_product_code | price | currency 
+----------+--------------------------------------+-----------------------+-------+----------
+ TICKET-1 | ad1a6721-fbbe-4f50-ba9b-71c5753ce57c | SINGLE                | 36.00 | DKK
+ TICKET-2 | ad1a6721-fbbe-4f50-ba9b-71c5753ce57c | SINGLE                | 36.00 | DKK
+ TICKET-3 | 53d71a88-c9d0-4b2f-bf08-920cef2eb9c4 | DAY                   | 65.00 | DKK
+(3 rows)
+
+
+===== database/postgres/experiments/lecture04/new_writer.sql =====
+INSERT 0 1
+                                 result                                  
+-------------------------------------------------------------------------
+ PASS: new writer stored matching ID/code and the agreed price 34.00 DKK
+(1 row)
+
+
+===== database/postgres/migrations/031_backfill_ticket_product.sql =====
+BEGIN
+ rows_backfilled 
+-----------------
+               3
+(1 row)
+
+COMMIT
+
+===== database/postgres/migrations/031_backfill_ticket_product.sql =====
+BEGIN
+ rows_backfilled 
+-----------------
+               0
+(1 row)
+
+COMMIT
+
+===== database/postgres/experiments/lecture04/old_writer.sql =====
+INSERT 0 1
+                               result                               
+--------------------------------------------------------------------
+ PASS: late old writer inserted a ticket with product_id still null
+(1 row)
+
+
+===== database/postgres/experiments/lecture04/new_reader.sql =====
+     id      |         resolved_product_id          | resolved_product_code | price | currency 
+-------------+--------------------------------------+-----------------------+-------+----------
+ L4-NEW-1    | ad1a6721-fbbe-4f50-ba9b-71c5753ce57c | SINGLE                | 34.00 | DKK
+ LAB04-OLD-1 | ad1a6721-fbbe-4f50-ba9b-71c5753ce57c | SINGLE                | 36.00 | DKK
+ TICKET-1    | ad1a6721-fbbe-4f50-ba9b-71c5753ce57c | SINGLE                | 36.00 | DKK
+ TICKET-2    | ad1a6721-fbbe-4f50-ba9b-71c5753ce57c | SINGLE                | 36.00 | DKK
+ TICKET-3    | 53d71a88-c9d0-4b2f-bf08-920cef2eb9c4 | DAY                   | 65.00 | DKK
+(5 rows)
+
+
+===== database/postgres/migrations/031_backfill_ticket_product.sql =====
+BEGIN
+ rows_backfilled 
+-----------------
+               1
+(1 row)
+
+COMMIT
+
+===== database/postgres/experiments/lecture04/verify.sql =====
+     id      | product_code |              product_id              | catalogue_price | ticket_price | currency 
+-------------+--------------+--------------------------------------+-----------------+--------------+----------
+ L4-NEW-1    | SINGLE       | ad1a6721-fbbe-4f50-ba9b-71c5753ce57c |           36.00 |        34.00 | DKK
+ LAB04-OLD-1 | SINGLE       | ad1a6721-fbbe-4f50-ba9b-71c5753ce57c |           36.00 |        36.00 | DKK
+ TICKET-1    | SINGLE       | ad1a6721-fbbe-4f50-ba9b-71c5753ce57c |           36.00 |        36.00 | DKK
+ TICKET-2    | SINGLE       | ad1a6721-fbbe-4f50-ba9b-71c5753ce57c |           36.00 |        36.00 | DKK
+ TICKET-3    | DAY          | 53d71a88-c9d0-4b2f-bf08-920cef2eb9c4 |           80.00 |        65.00 | DKK
+(5 rows)
+
+DO
+                              result                              
+------------------------------------------------------------------
+ PASS: references match and mismatch is rejected (SQLSTATE 23503)
+(1 row)
+
+                                result                                
+----------------------------------------------------------------------
+ PASS: TICKET-3 remains DAY at 65 DKK while catalogue price is 80 DKK
+(1 row)
+
+
+===== database/postgres/migrations/032_require_ticket_product.sql =====
+BEGIN
+SET
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+COMMIT
+
+===== database/postgres/experiments/lecture04/old_reader.sql =====
+     id      | product_code | price | currency 
+-------------+--------------+-------+----------
+ L4-NEW-1    | SINGLE       | 34.00 | DKK
+ LAB04-OLD-1 | SINGLE       | 36.00 | DKK
+ TICKET-1    | SINGLE       | 36.00 | DKK
+ TICKET-2    | SINGLE       | 36.00 | DKK
+ TICKET-3    | DAY          | 65.00 | DKK
+(5 rows)
+
+
+===== database/postgres/experiments/lecture04/compatibility_checks.sql =====
+BEGIN
+DO
+                              result                               
+-------------------------------------------------------------------
+ PASS: old writer shape is rejected after cutover (SQLSTATE 23502)
+(1 row)
+
+ROLLBACK
+
+===== database/postgres/experiments/lecture04/pre_remove_checks.sql =====
+           conname           |                              definition                              
+-----------------------------+----------------------------------------------------------------------
+ tickets_product_code_fk     | FOREIGN KEY (product_code) REFERENCES products(code)
+ tickets_product_id_fk       | FOREIGN KEY (product_id) REFERENCES products(id)
+ tickets_product_identity_fk | FOREIGN KEY (product_id, product_code) REFERENCES products(id, code)
+(3 rows)
+
+   dependent_view_before_removal    
+------------------------------------
+  SELECT product_code,             +
+     currency,                     +
+     count(*) AS ticket_count,     +
+     sum(price) AS total_sales     +
+    FROM tickets t                 +
+   GROUP BY product_code, currency;
+(1 row)
+
+DO
+                                      result                                      
+----------------------------------------------------------------------------------
+ PASS: no null/mismatch remains; FKs are validated; dependent view was identified
+(1 row)
+
+
+===== database/postgres/migrations/033_remove_legacy_product_code.sql =====
+BEGIN
+SET
+DO
+DROP MATERIALIZED VIEW
+ALTER TABLE
+SELECT 2
+CREATE INDEX
+COMMIT
+
+===== database/postgres/experiments/lecture04/final_reader.sql =====
+     id      |              product_id              | product_code | price | currency 
+-------------+--------------------------------------+--------------+-------+----------
+ L4-NEW-1    | ad1a6721-fbbe-4f50-ba9b-71c5753ce57c | SINGLE       | 34.00 | DKK
+ LAB04-OLD-1 | ad1a6721-fbbe-4f50-ba9b-71c5753ce57c | SINGLE       | 36.00 | DKK
+ TICKET-1    | ad1a6721-fbbe-4f50-ba9b-71c5753ce57c | SINGLE       | 36.00 | DKK
+ TICKET-2    | ad1a6721-fbbe-4f50-ba9b-71c5753ce57c | SINGLE       | 36.00 | DKK
+ TICKET-3    | 53d71a88-c9d0-4b2f-bf08-920cef2eb9c4 | DAY          | 65.00 | DKK
+(5 rows)
+
+
+===== database/postgres/experiments/lecture04/final_writer.sql =====
+INSERT 0 1
+                           result                           
+------------------------------------------------------------
+ PASS: final writer inserted a ticket using product_id only
+(1 row)
+
+
+===== database/postgres/experiments/lecture04/final_verify.sql =====
+REFRESH MATERIALIZED VIEW
+DO
+                              result                               
+-------------------------------------------------------------------
+ PASS: legacy column removed and all tickets resolve by product_id
+(1 row)
+
+                               result                               
+--------------------------------------------------------------------
+ PASS: historical DAY ticket remains 65 DKK versus catalogue 80 DKK
+(1 row)
+
+                         result                          
+---------------------------------------------------------
+ PASS: migrated materialized view matches the base table
+(1 row)
+
+
+Lecture 4 tests passed.

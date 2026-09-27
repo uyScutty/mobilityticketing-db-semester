@@ -1,0 +1,57 @@
+Lecture 1 PostgreSQL test output
+
+===== database/postgres/init/001_relational_baseline.sql =====
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+
+===== database/postgres/init/002_seed.sql =====
+INSERT 0 2
+INSERT 0 3
+INSERT 0 4
+INSERT 0 6
+INSERT 0 4
+
+===== database/postgres/init/003_queries.sql =====
+          id           | route_id | service_date | scheduled_departure_utc |  status   
+-----------------------+----------+--------------+-------------------------+-----------
+ TRIP-M2-20260429-0800 | LINE-M2  | 2026-04-29   | 2026-04-29 08:00:00+00  | Scheduled
+ TRIP-M2-20260429-1200 | LINE-M2  | 2026-04-29   | 2026-04-29 12:00:00+00  | Scheduled
+(2 rows)
+
+ stop_sequence |       stop_id       |        name        
+---------------+---------------------+--------------------
+             1 | STOP-NORREPORT      | N??rreport
+             2 | STOP-KONGENS-NYTORV | Kongens Nytorv
+             3 | STOP-AIRPORT        | Copenhagen Airport
+(3 rows)
+
+   id    | short_name | scheduled_trip_count 
+---------+------------+----------------------
+ LINE-12 | 12         |                    0
+ LINE-5C | 5C         |                    2
+ LINE-M2 | M2         |                    2
+(3 rows)
+
+
+===== database/postgres/experiments/lecture01/verify.sql =====
+DO
+                            result                            
+--------------------------------------------------------------
+ PASS: next trips are filtered, ordered and limited correctly
+(1 row)
+
+                        result                         
+-------------------------------------------------------
+ PASS: route stops are returned in stop_sequence order
+(1 row)
+
+                          result                          
+----------------------------------------------------------
+ PASS: route aggregation includes LINE-12 with zero trips
+(1 row)
+
+
+Lecture 1 tests passed.
