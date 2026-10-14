@@ -1,4 +1,18 @@
 services:
+  mongo:
+    image: mongo:8.0.1
+    ports:
+      - "127.0.0.1:27017:27017"
+    volumes:
+      - mobility-mongo-data:/data/db
+      - ./database/mongodb:/scripts:ro
+    healthcheck:
+      test: ["CMD", "mongosh","--quiet","--eval", "db.adminCommand('ping')"]
+      interval: 2s
+      timeout: 3s
+      retries: 15
+      start_period: 5s  
+
   postgres:
     image: postgres:17-alpine
     environment:
@@ -14,3 +28,8 @@ services:
       interval: 2s
       timeout: 3s
       retries: 15
+
+volumes:
+  mobility-mongo-data:
+  mobility-postgres-data:
+      
